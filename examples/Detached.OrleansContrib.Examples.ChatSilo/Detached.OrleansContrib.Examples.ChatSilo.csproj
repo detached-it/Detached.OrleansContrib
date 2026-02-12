@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Server" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Orleans.Transactions" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Detached.OrleansContrib.Streaming.GrainStream\Detached.OrleansContrib.Streaming.GrainStream.csproj" />
+    <ProjectReference Include="..\Detached.OrleansContrib.Examples.Grains\Detached.OrleansContrib.Examples.Grains.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,134 @@
+﻿@page "/chat"
+@using Detached.OrleansContrib.Examples.Contracts
+@using global::Orleans
+@using global::Orleans.Streams
+@using global::Orleans.Runtime
+@rendermode InteractiveServer
+@inject IClusterClient ClusterClient
+
+<PageTitle>Chat</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+                <h5>Join Channel</h5>
+                <div class="mb-3">
+                    <label class="form-label">User Name</label>
+                    <input class="form-control" @bind="_userName" placeholder="Enter your name" disabled="@_isJoined" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Channel Name</label>
+                    <input class="form-control" @bind="_channelName" placeholder="Enter channel name" disabled="@_isJoined" />
+                </div>
+                @if (!_isJoined)
+                {
+                    <button class="btn btn-primary w-100" @onclick="JoinChannel" disabled="@(string.IsNullOrWhiteSpace(_userName) || string.IsNullOrWhiteSpace(_channelName))">Join</button>
+                }
+                else
+                {
+                    <button class="btn btn-danger w-100" @onclick="LeaveChannel">Leave</button>
+                }
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <strong>Channel: @(_isJoined ? _channelName : "Not Connected")</strong>
+                </div>
+                <div class="card-body overflow-auto" style="height: 400px;" id="chat-messages">
+                    @foreach (var msg in _messages)
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small">[@msg.Timestamp.ToLocalTime().ToString("HH:mm:ss")]</span>
+                            <strong class="@(msg.UserName == "System" ? "text-danger" : "text-primary")">@msg.UserName:</strong>
+                            <span>@msg.Text</span>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <input class="form-control" @bind="_newMessage" @onkeyup="HandleKeyUp" placeholder="Type a message..." disabled="@(!_isJoined)" />
+                        <button class="btn btn-success" @onclick="SendMessage" disabled="@(!_isJoined || string.IsNullOrWhiteSpace(_newMessage))">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _userName = "";
+    private string _channelName = "";
+    private string _newMessage = "";
+    private bool _isJoined = false;
+    private List<ChatMessage> _messages = new();
+    private StreamSubscriptionHandle<ChatMessage>? _subscriptionHandle;
+
+    private async Task JoinChannel()
+    {
+        if (string.IsNullOrWhiteSpace(_userName) || string.IsNullOrWhiteSpace(_channelName)) return;
+
+        var grain = ClusterClient.GetGrain<IChatChannelGrain>(_channelName);
+        await grain.Join(_userName);
+
+        var streamProvider = ClusterClient.GetStreamProvider("ChatStreamProvider");
+        var streamId = StreamId.Create("ChatNamespace", _channelName);
+        var stream = streamProvider.GetStream<ChatMessage>(streamId);
+
+        _subscriptionHandle = await stream.SubscribeAsync(OnMessageReceived);
+        _isJoined = true;
+        _messages.Clear();
+    }
+
+    private async Task LeaveChannel()
+    {
+        if (!_isJoined) return;
+
+        var grain = ClusterClient.GetGrain<IChatChannelGrain>(_channelName);
+        await grain.Leave(_userName);
+
+        if (_subscriptionHandle != null)
+        {
+            await _subscriptionHandle.UnsubscribeAsync();
+            _subscriptionHandle = null;
+        }
+
+        _isJoined = false;
+        _messages.Clear();
+    }
+
+    private async Task SendMessage()
+    {
+        if (!_isJoined || string.IsNullOrWhiteSpace(_newMessage)) return;
+
+        var grain = ClusterClient.GetGrain<IChatChannelGrain>(_channelName);
+        await grain.SendMessage(_userName, _newMessage);
+        _newMessage = "";
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
+        }
+    }
+
+    private Task OnMessageReceived(ChatMessage message, StreamSequenceToken? token)
+    {
+        return InvokeAsync(() =>
+        {
+            _messages.Add(message);
+            StateHasChanged();
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_subscriptionHandle != null)
+        {
+            await _subscriptionHandle.UnsubscribeAsync();
+        }
+    }
+}

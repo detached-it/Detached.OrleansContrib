@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/Detached.OrleansContrib.Examples.ChatClient/Detached.OrleansContrib.Examples.ChatClient.csproj" />
+    <Project Path="examples/Detached.OrleansContrib.Examples.ChatSilo/Detached.OrleansContrib.Examples.ChatSilo.csproj" />
+    <Project Path="examples/Detached.OrleansContrib.Examples.Contracts/Detached.OrleansContrib.Examples.Contracts.csproj" />
+    <Project Path="examples/Detached.OrleansContrib.Examples.Grains/Detached.OrleansContrib.Examples.Grains.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Detached.OrleansContrib.Streaming.GrainStream/Detached.OrleansContrib.Streaming.GrainStream.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Detached.OrleansContrib.Streaming.GrainStream.Tests/Detached.OrleansContrib.Streaming.GrainStream.Tests.csproj" />
+  </Folder>
+</Solution>
