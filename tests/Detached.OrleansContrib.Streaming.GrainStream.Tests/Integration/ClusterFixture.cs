@@ -6,6 +6,7 @@
 
 using Detached.OrleansContrib.Streaming.GrainStream.Extensions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Orleans.TestingHost;
 
 namespace Detached.OrleansContrib.Streaming.GrainStream.Tests.Integration;
@@ -43,6 +44,7 @@ public sealed class ClusterFixture : IAsyncLifetime
         public void Configure(ISiloBuilder siloBuilder)
         {
             siloBuilder
+                .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Debug))
                 .AddMemoryGrainStorage("GrainStreamStore")
                 .AddMemoryGrainStorageAsDefault() // Fallback
                 .AddMemoryGrainStorage("PubSubStore")

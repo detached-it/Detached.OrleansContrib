@@ -4,6 +4,33 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package Info">
+    <Title>Detached Orleans GrainStream</Title>
+    <Authors>Detached Developers &lt;dev@detached.co.za&gt;</Authors>
+    <Company>Detached IT</Company>
+    <Description>A stream provider for Orleans that utilizes grains for messaging and persistence.</Description>
+    <Copyright>©2026 Detached IT</Copyright>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <!--<FileDescription>$(Description)</FileDescription>-->
+    <PackageDescription>$(Description)</PackageDescription>
+    <PackageProjectUrl>https://github.com/detached-it/Detached.OrleansContrib</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/detached-it/Detached.OrleansContrib.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>dotnet;Detached;Orleans;Streaming;.net</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +38,25 @@
     <PackageReference Include="Microsoft.Orleans.Serialization" Version="10.0.1" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="10.0.1" />
     <PackageReference Include="Microsoft.Orleans.Transactions" Version="10.0.1" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

@@ -18,18 +18,23 @@ namespace Detached.OrleansContrib.Streaming.GrainStream.Models;
 [Alias("Detached.OrleansContrib.Streaming.GrainStream.GrainStreamBatchContainer")]
 public sealed class GrainStreamBatchContainer : IBatchContainer
 {
+    /// <inheritdoc/>
     [Id(0)]
     public StreamId StreamId { get; set; }
 
+    /// <summary>Serialised event payload.</summary>
     [Id(1)]
     public byte[] Payload { get; set; } = [];
 
+    /// <summary>Monotonically increasing sequence number.</summary>
     [Id(2)]
     public long SequenceNumber { get; set; }
 
+    /// <summary>Unique identifier for the message.</summary>
     [Id(3)]
     public Guid MessageId { get; set; }
 
+    /// <summary>Optional request context propagated from the producer.</summary>
     [Id(4)]
     public Dictionary<string, object>? RequestContext { get; set; }
 

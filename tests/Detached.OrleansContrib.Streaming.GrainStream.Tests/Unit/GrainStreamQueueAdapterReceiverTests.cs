@@ -18,11 +18,13 @@ public sealed class GrainStreamQueueAdapterReceiverTests
 {
     private readonly Mock<IStreamQueueGrain> _mockGrain = new();
     private readonly GrainStreamOptions _options = new() { MaxBatchSize = 50 };
-    private readonly ILogger<GrainStreamQueueAdapterReceiver> _logger =
-        Mock.Of<ILogger<GrainStreamQueueAdapterReceiver>>();
+    private readonly Mock<ILogger<GrainStreamQueueAdapterReceiver>> _mockLogger = new();
 
-    private GrainStreamQueueAdapterReceiver CreateReceiver() =>
-        new(_mockGrain.Object, _options, _logger);
+    private GrainStreamQueueAdapterReceiver CreateReceiver()
+    {
+        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
+        return new GrainStreamQueueAdapterReceiver(_mockGrain.Object, _options, _mockLogger.Object);
+    }
 
     [Fact]
     public async Task Initialize_CompletesSuccessfully()
@@ -124,8 +126,8 @@ public sealed class GrainStreamQueueAdapterReceiverTests
     [Fact]
     public void Constructor_ThrowsOnNullArguments()
     {
-        Assert.Throws<ArgumentNullException>(() => new GrainStreamQueueAdapterReceiver(null!, _options, _logger));
-        Assert.Throws<ArgumentNullException>(() => new GrainStreamQueueAdapterReceiver(_mockGrain.Object, null!, _logger));
+        Assert.Throws<ArgumentNullException>(() => new GrainStreamQueueAdapterReceiver(null!, _options, _mockLogger.Object));
+        Assert.Throws<ArgumentNullException>(() => new GrainStreamQueueAdapterReceiver(_mockGrain.Object, null!, _mockLogger.Object));
         Assert.Throws<ArgumentNullException>(() => new GrainStreamQueueAdapterReceiver(_mockGrain.Object, _options, null!));
     }
 }

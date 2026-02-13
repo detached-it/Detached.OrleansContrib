@@ -8,7 +8,6 @@ using Detached.OrleansContrib.Streaming.GrainStream.Configuration;
 using Detached.OrleansContrib.Streaming.GrainStream.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Concurrency;
 using Orleans.Transactions.Abstractions;
 
 namespace Detached.OrleansContrib.Streaming.GrainStream.Grains;
@@ -25,6 +24,12 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
     private readonly GrainStreamOptions _options;
     private readonly ILogger<StreamQueueGrain> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StreamQueueGrain"/> class.
+    /// </summary>
+    /// <param name="state">The transactional state for the queue.</param>
+    /// <param name="options">Grain stream options.</param>
+    /// <param name="logger">Logger instance.</param>
     public StreamQueueGrain(
         [TransactionalState("queueState", "GrainStreamStore")]
         ITransactionalState<StreamQueueState> state,
@@ -36,6 +41,7 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    /// <inheritdoc/>
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         await base.OnActivateAsync(cancellationToken);
@@ -47,6 +53,7 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
             this.GetPrimaryKeyString(), intervalSeconds);
     }
 
+    /// <inheritdoc/>
     public async Task EnqueueAsync(List<StreamMessage> messages)
     {
         ArgumentNullException.ThrowIfNull(messages);
@@ -63,6 +70,7 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
         _logger.LogDebug("Enqueued {Count} messages into queue {GrainId}.", messages.Count, this.GetPrimaryKeyString());
     }
 
+    /// <inheritdoc/>
     public async Task<List<StreamMessage>> DequeueAsync(int maxCount)
     {
         var result = new List<StreamMessage>();
@@ -94,6 +102,7 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
         return result;
     }
 
+    /// <inheritdoc/>
     public async Task AcknowledgeAsync(List<Guid> messageIds)
     {
         ArgumentNullException.ThrowIfNull(messageIds);
@@ -109,12 +118,14 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
         _logger.LogDebug("Acknowledged {Count} messages in queue {GrainId}.", messageIds.Count, this.GetPrimaryKeyString());
     }
 
+    /// <inheritdoc/>
     public async Task<int> GetQueueLengthAsync()
     {
         return await _state.PerformRead(state =>
             state.PendingMessages.Count + state.InFlightMessages.Count);
     }
 
+    /// <inheritdoc/>
     [Transaction(TransactionOption.CreateOrJoin)]
     public async Task ReceiveReminder(string reminderName, TickStatus status)
     {
@@ -122,6 +133,7 @@ public sealed class StreamQueueGrain : Grain, IStreamQueueGrain, IRemindable
         await this.AsReference<IStreamQueueGrain>().ProcessDeadLetterCheckAsync();
     }
 
+    /// <inheritdoc/>
     [Transaction(TransactionOption.CreateOrJoin)]
     public async Task ProcessDeadLetterCheckAsync()
     {

@@ -25,6 +25,15 @@ public sealed class GrainStreamAdapterFactory : IQueueAdapterFactory
     private readonly IStreamQueueMapper _streamQueueMapper;
     private readonly IQueueAdapterCache _adapterCache;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GrainStreamAdapterFactory"/> class.
+    /// </summary>
+    /// <param name="name">The provider name.</param>
+    /// <param name="options">Stream configuration options.</param>
+    /// <param name="grainFactory">Orleans grain factory.</param>
+    /// <param name="loggerFactory">Logger factory.</param>
+    /// <param name="queueMapperOptions">Queue mapper options.</param>
+    /// <param name="cacheOptions">Cache options.</param>
     public GrainStreamAdapterFactory(
         string name,
         GrainStreamOptions options,
